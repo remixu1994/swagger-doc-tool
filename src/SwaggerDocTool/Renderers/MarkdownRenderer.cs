@@ -3,7 +3,7 @@ using SwaggerDocTool.Core;
 
 namespace SwaggerDocTool.Renderers;
 
-internal sealed class MarkdownRenderer : IDocumentRenderer
+public sealed class MarkdownRenderer : IDocumentRenderer
 {
     public string Format => "md";
 

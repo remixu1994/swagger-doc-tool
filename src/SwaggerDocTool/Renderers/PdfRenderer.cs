@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Markdig;
@@ -11,7 +12,7 @@ using SwaggerDocTool.Core;
 
 namespace SwaggerDocTool.Renderers;
 
-internal sealed class PdfRenderer : IDocumentRenderer
+public sealed class PdfRenderer : IDocumentRenderer
 {
     private readonly MarkdownRenderer _markdownRenderer;
     private readonly MarkdownPipeline _markdownPipeline;
@@ -57,6 +58,33 @@ internal sealed class PdfRenderer : IDocumentRenderer
             .GeneratePdf(outputPath);
     }
 
+    public void Render(ApiDocument document, Stream stream)
+    {
+        var markdown = _markdownRenderer.RenderToString(document);
+        var markdownDocument = Markdown.Parse(markdown, _markdownPipeline);
+        var blocks = ToBlocks(markdownDocument);
+
+        Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(32);
+                    page.Size(PageSizes.A4);
+                    page.DefaultTextStyle(style => style.FontFamily("Arial").FontSize(10));
+                    page.Content().Column(column =>
+                    {
+                        column.Spacing(8);
+
+                        foreach (var block in blocks)
+                        {
+                            column.Item().Element(item => RenderBlock(item, block));
+                        }
+                    });
+                });
+            })
+            .GeneratePdf(stream);
+    }
+
     private static IReadOnlyList<PdfBlock> ToBlocks(MarkdownDocument markdownDocument)
     {
         var blocks = new List<PdfBlock>();
@@ -70,6 +98,9 @@ internal sealed class PdfRenderer : IDocumentRenderer
                     break;
                 case ParagraphBlock paragraphBlock:
                     blocks.Add(new PdfParagraphBlock(ExtractInlineText(paragraphBlock.Inline)));
+                    break;
+                case ListBlock listBlock:
+                    blocks.AddRange(ToListBlocks(listBlock, 0));
                     break;
                 case Table table:
                     blocks.Add(ToTableBlock(table));
@@ -115,6 +146,42 @@ internal sealed class PdfRenderer : IDocumentRenderer
         }
 
         return new PdfTableBlock(header, rows);
+    }
+
+    private static IReadOnlyList<PdfBlock> ToListBlocks(ListBlock listBlock, int level)
+    {
+        var blocks = new List<PdfBlock>();
+        var index = 1;
+
+        foreach (var itemObject in listBlock)
+        {
+            if (itemObject is not ListItemBlock item)
+            {
+                continue;
+            }
+
+            var marker = listBlock.IsOrdered ? $"{index}." : "•";
+
+            foreach (var childBlock in item)
+            {
+                switch (childBlock)
+                {
+                    case ParagraphBlock paragraphBlock:
+                        blocks.Add(new PdfListItemBlock(level, marker, ExtractInlineText(paragraphBlock.Inline)));
+                        break;
+                    case HeadingBlock headingBlock:
+                        blocks.Add(new PdfListItemBlock(level, marker, ExtractInlineText(headingBlock.Inline)));
+                        break;
+                    case ListBlock nestedList:
+                        blocks.AddRange(ToListBlocks(nestedList, level + 1));
+                        break;
+                }
+            }
+
+            index++;
+        }
+
+        return blocks;
     }
 
     private static string ExtractTableCellText(TableCell cell)
@@ -223,6 +290,9 @@ internal sealed class PdfRenderer : IDocumentRenderer
             case PdfParagraphBlock paragraph:
                 container.Text(paragraph.Text);
                 break;
+            case PdfListItemBlock listItem:
+                RenderListItem(container, listItem);
+                break;
             case PdfTableBlock table:
                 RenderTable(container, table);
                 break;
@@ -300,6 +370,13 @@ internal sealed class PdfRenderer : IDocumentRenderer
             .Padding(4);
     }
 
+    private static void RenderListItem(IContainer container, PdfListItemBlock listItem)
+    {
+        container
+            .PaddingLeft(listItem.Level * 14)
+            .Text($"{listItem.Marker} {listItem.Text}");
+    }
+
     private static void EnsureParentDirectory(string outputPath)
     {
         var directory = Path.GetDirectoryName(outputPath);
@@ -315,6 +392,8 @@ internal sealed class PdfRenderer : IDocumentRenderer
     private sealed record PdfHeadingBlock(int Level, string Text) : PdfBlock;
 
     private sealed record PdfParagraphBlock(string Text) : PdfBlock;
+
+    private sealed record PdfListItemBlock(int Level, string Marker, string Text) : PdfBlock;
 
     private sealed record PdfTableBlock(IReadOnlyList<string> Header, IReadOnlyList<IReadOnlyList<string>> Rows) : PdfBlock;
 }

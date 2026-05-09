@@ -1,3 +1,4 @@
+using System.IO;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -5,15 +6,20 @@ using SwaggerDocTool.Core;
 
 namespace SwaggerDocTool.Renderers;
 
-internal sealed class DocxRenderer : IDocumentRenderer
+public sealed class DocxRenderer : IDocumentRenderer
 {
     public string Format => "docx";
 
     public void Render(ApiDocument document, string outputPath)
     {
         EnsureParentDirectory(outputPath);
+        using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+        Render(document, stream);
+    }
 
-        using var wordDocument = WordprocessingDocument.Create(outputPath, WordprocessingDocumentType.Document);
+    public void Render(ApiDocument document, Stream stream)
+    {
+        using var wordDocument = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document);
         var mainPart = wordDocument.AddMainDocumentPart();
         mainPart.Document = new Document();
 

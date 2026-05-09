@@ -1,4 +1,6 @@
 using System.Text;
+using System.Reflection;
+using Markdig;
 using Microsoft.OpenApi.Readers;
 using SwaggerDocTool.Core;
 using SwaggerDocTool.Renderers;
@@ -15,6 +17,7 @@ internal static class Program
             ("SchemaParser_FlattensNestedObjectsAndArrays", SchemaParser_FlattensNestedObjectsAndArrays),
             ("MarkdownRenderer_RendersExpectedSections", MarkdownRenderer_RendersExpectedSections),
             ("MarkdownRenderer_PreservesBreakMarkupInTableCells", MarkdownRenderer_PreservesBreakMarkupInTableCells),
+            ("PdfRenderer_PreservesEndpointListItems", PdfRenderer_PreservesEndpointListItems),
             ("Program_AllFormat_CreatesExpectedFiles", Program_AllFormat_CreatesExpectedFiles),
             ("Program_InvalidFormat_ReturnsNonZero", Program_InvalidFormat_ReturnsNonZero)
         };
@@ -105,6 +108,33 @@ internal static class Program
         var markdown = renderer.RenderToString(document);
 
         AssertContains("Business code.<br/>200: success.<br/>400: Bad Request.<br/>500: Internal Server Errors.", markdown, "Markdown should preserve <br/> markers in table cells.");
+    }
+
+    private static void PdfRenderer_PreservesEndpointListItems()
+    {
+        using var stream = CreateSampleOpenApiStream();
+        var openApiDocument = new OpenApiStreamReader().Read(stream, out _);
+        var document = SwaggerParser.Parse(openApiDocument);
+        var markdownRenderer = new MarkdownRenderer();
+        var pdfRenderer = new PdfRenderer(markdownRenderer);
+        var markdown = markdownRenderer.RenderToString(document);
+
+        var pipelineField = typeof(PdfRenderer).GetField("_markdownPipeline", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Failed to locate PDF markdown pipeline.");
+        var pipeline = (MarkdownPipeline)pipelineField.GetValue(pdfRenderer)!;
+        var markdownDocument = Markdown.Parse(markdown, pipeline);
+
+        var toBlocksMethod = typeof(PdfRenderer).GetMethod("ToBlocks", BindingFlags.Static | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Failed to locate PDF block converter.");
+        var blocks = ((IEnumerable<object>)toBlocksMethod.Invoke(null, new object[] { markdownDocument })!).ToList();
+
+        var listItemTexts = blocks
+            .Where(block => block.GetType().Name == "PdfListItemBlock")
+            .Select(block => (string)(block.GetType().GetProperty("Text")?.GetValue(block) ?? ""))
+            .ToList();
+
+        AssertTrue(listItemTexts.Contains("Endpoint: /users"), "PDF block conversion should preserve endpoint list items.");
+        AssertTrue(listItemTexts.Contains("Method: GET"), "PDF block conversion should preserve method list items.");
     }
 
     private static void Program_AllFormat_CreatesExpectedFiles()

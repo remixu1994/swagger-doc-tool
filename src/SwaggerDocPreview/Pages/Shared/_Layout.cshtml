@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SwaggerDocPreview.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="app-header">
+        <div class="app-header-inner">
+            <a href="/swagger" class="brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.18"></circle>
+                        <path d="M9.6 7.2c.7-.5 1.5-.7 2.4-.7 1.2 0 2.3.5 3 1.3m-5.4 8.2c-.7.5-1.5.7-2.4.7-1.2 0-2.3-.5-3-1.3m11.6-2.2c.5-.7.7-1.5.7-2.4 0-1.2-.5-2.3-1.3-3m-8.2 5.4c-.5.7-.7 1.5-.7 2.4 0 1.2.5 2.3 1.3 3m1.3-7.3h6.2m-3.1-3.1v6.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+                    </svg>
+                </span>
+                <span class="brand-copy">Swagger Doc Preview</span>
+            </a>
+
+            <div class="header-actions">
+                <a href="https://github.com/remixu1994/swagger-doc-tool" target="_blank" rel="noreferrer" class="github-link">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.4-4-1.4a3.2 3.2 0 0 0-1.3-1.7c-1.1-.8.1-.8.1-.8a2.5 2.5 0 0 1 1.9 1.2 2.6 2.6 0 0 0 3.6 1 2.6 2.6 0 0 1 .8-1.6c-2.7-.3-5.5-1.4-5.5-6a4.7 4.7 0 0 1 1.2-3.2 4.4 4.4 0 0 1 .1-3.1s1-.3 3.3 1.2a11.6 11.6 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2a4.4 4.4 0 0 1 .1 3.1 4.7 4.7 0 0 1 1.2 3.2c0 4.6-2.8 5.7-5.5 6a2.9 2.9 0 0 1 .8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+                    </svg>
+                    <span>GitHub</span>
+                </a>
+                <span class="version-pill">v0.1.0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-shell">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

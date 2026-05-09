@@ -2,7 +2,7 @@ using SwaggerDocTool.Core;
 
 namespace SwaggerDocTool.Renderers;
 
-internal interface IDocumentRenderer
+public interface IDocumentRenderer
 {
     string Format { get; }
 
