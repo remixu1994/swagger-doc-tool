@@ -1,4 +1,5 @@
 using System.Text;
+using System.Xml.Linq;
 using SwaggerDocPreview.Models;
 using SwaggerDocPreview.Services;
 
@@ -27,6 +28,32 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
+
+app.MapGet("/sitemap.xml", (HttpContext context) =>
+{
+    var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+    var document = new XDocument(
+        new XDeclaration("1.0", "utf-8", null),
+        new XElement(
+            XName.Get("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9"),
+            CreateSitemapUrl(baseUrl, "/", "weekly", "1.0"),
+            CreateSitemapUrl(baseUrl, "/swagger", "weekly", "0.9")));
+
+    return Results.Text(document.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
+});
+
+app.MapGet("/robots.txt", (HttpContext context) =>
+{
+    var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+    var robots = string.Join(
+        "\n",
+        "User-agent: *",
+        "Allow: /",
+        $"Sitemap: {baseUrl}/sitemap.xml",
+        "");
+
+    return Results.Text(robots, "text/plain", Encoding.UTF8);
+});
 
 app.MapPost("/swagger/preview", async (HttpContext context, ISwaggerPreviewStore store) =>
 {
@@ -118,3 +145,14 @@ app.MapPost("/swagger/download-all", async (HttpContext context, ISwaggerPreview
 });
 
 app.Run();
+
+static XElement CreateSitemapUrl(string baseUrl, string path, string changeFrequency, string priority)
+{
+    XNamespace sitemap = "http://www.sitemaps.org/schemas/sitemap/0.9";
+
+    return new XElement(
+        sitemap + "url",
+        new XElement(sitemap + "loc", $"{baseUrl}{path}"),
+        new XElement(sitemap + "changefreq", changeFrequency),
+        new XElement(sitemap + "priority", priority));
+}
