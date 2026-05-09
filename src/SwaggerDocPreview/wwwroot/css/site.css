@@ -632,6 +632,67 @@ code {
     max-width: 520px;
 }
 
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    place-items: center;
+    padding: 24px;
+    background: rgba(10, 21, 48, 0.42);
+    backdrop-filter: blur(4px);
+}
+
+.is-download-loading .loading-overlay {
+    display: grid;
+}
+
+.download-frame {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 0;
+    visibility: hidden;
+}
+
+.loading-dialog {
+    width: min(360px, 100%);
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 24px 70px rgba(4, 12, 31, 0.22);
+    color: var(--text);
+    text-align: center;
+}
+
+.loading-dialog strong {
+    font-size: 1.04rem;
+}
+
+.loading-dialog span:last-child {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+}
+
+.loading-spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid rgba(29, 99, 240, 0.18);
+    border-top-color: var(--accent);
+    border-radius: 999px;
+    animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 1200px) {
     .input-grid,
     .document-grid {

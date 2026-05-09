@@ -17,3 +17,19 @@ SwaggerDocTool swagger.json --format all --output .\docs
 - `--format all`: `--output` must be a directory path.
 - `all` mode writes files using the input swagger filename.
   - example: `swagger.json` -> `swagger.md`, `swagger.docx`, `swagger.pdf`
+
+## SwaggerDocPreview Docker
+
+Build the preview site image from the repository root:
+
+```powershell
+docker build -t swagger-doc-preview .
+```
+
+Run the container:
+
+```powershell
+docker run --rm -p 5194:8080 swagger-doc-preview
+```
+
+Open `http://localhost:5194` to use the Swagger JSON preview and export page.

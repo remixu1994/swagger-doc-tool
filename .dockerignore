@@ -1,0 +1,10 @@
+.git/
+.dotnet/
+.idea/
+**/bin/
+**/obj/
+docs/
+src/SwaggerDocTool/docs/
+PLAN.md
+*.user
+*.suo

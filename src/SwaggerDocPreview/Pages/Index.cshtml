@@ -106,7 +106,7 @@
         </dl>
 
         <div class="download-grid">
-            <form method="post" action="/swagger/download" class="download-card-form">
+            <form method="post" action="/swagger/download" target="download-frame" class="download-card-form js-download-form">
                 <input type="hidden" name="previewId" value="@Model.PreviewId" />
                 <input type="hidden" name="format" value="md" />
                 <button type="submit" class="download-card" @(hasPreview ? null : "disabled")>
@@ -118,7 +118,7 @@
                 </button>
             </form>
 
-            <form method="post" action="/swagger/download" class="download-card-form">
+            <form method="post" action="/swagger/download" target="download-frame" class="download-card-form js-download-form">
                 <input type="hidden" name="previewId" value="@Model.PreviewId" />
                 <input type="hidden" name="format" value="docx" />
                 <button type="submit" class="download-card" @(hasPreview ? null : "disabled")>
@@ -130,7 +130,7 @@
                 </button>
             </form>
 
-            <form method="post" action="/swagger/download" class="download-card-form">
+            <form method="post" action="/swagger/download" target="download-frame" class="download-card-form js-download-form">
                 <input type="hidden" name="previewId" value="@Model.PreviewId" />
                 <input type="hidden" name="format" value="pdf" />
                 <button type="submit" class="download-card" @(hasPreview ? null : "disabled")>
@@ -142,7 +142,7 @@
                 </button>
             </form>
 
-            <form method="post" action="/swagger/download-all" class="download-card-form">
+            <form method="post" action="/swagger/download-all" target="download-frame" class="download-card-form js-download-form">
                 <input type="hidden" name="previewId" value="@Model.PreviewId" />
                 <button type="submit" class="download-card" @(hasPreview ? null : "disabled")>
                     <span class="download-icon download-icon-all">ZIP</span>
@@ -187,6 +187,15 @@
     }
 </section>
 
+<div class="loading-overlay" id="download-loading-overlay" aria-live="polite" aria-hidden="true">
+    <div class="loading-dialog" role="status">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <strong>Generating documentation</strong>
+        <span>Please wait while the file is prepared.</span>
+    </div>
+</div>
+<iframe name="download-frame" class="download-frame" title="Download target"></iframe>
+
 @section Styles
 {
     @if (hasPreview)
@@ -217,6 +226,9 @@
             const metaVersion = document.getElementById("meta-version");
             const metaSource = document.getElementById("meta-source");
             const metaStatus = document.getElementById("meta-status");
+            const downloadForms = document.querySelectorAll(".js-download-form");
+            const loadingOverlay = document.getElementById("download-loading-overlay");
+            let loadingTimer = null;
 
             const updateLineNumbers = () => {
                 const totalLines = Math.max(1, textArea.value.split("\n").length);
@@ -292,6 +304,34 @@
 
             expandButton.addEventListener("click", () => {
                 previewPanel.classList.toggle("is-expanded");
+            });
+
+            const setDownloadLoading = (isLoading) => {
+                document.body.classList.toggle("is-download-loading", isLoading);
+                loadingOverlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+
+                document.querySelectorAll("button, input:not([type='hidden']), textarea").forEach((element) => {
+                    if (element.dataset.originallyDisabled === undefined) {
+                        element.dataset.originallyDisabled = element.disabled ? "true" : "false";
+                    }
+
+                    element.disabled = isLoading || element.dataset.originallyDisabled === "true";
+
+                    if (!isLoading) {
+                        delete element.dataset.originallyDisabled;
+                    }
+                });
+            };
+
+            downloadForms.forEach((form) => {
+                form.addEventListener("submit", () => {
+                    window.clearTimeout(loadingTimer);
+                    setDownloadLoading(true);
+
+                    loadingTimer = window.setTimeout(() => {
+                        setDownloadLoading(false);
+                    }, 8000);
+                });
             });
 
             updateLineNumbers();
