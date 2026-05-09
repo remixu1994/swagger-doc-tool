@@ -4,8 +4,29 @@ using SwaggerDocPreview.Models;
 using SwaggerDocPreview.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var seoPageRoutes = new[]
+{
+    "/swagger-json-preview",
+    "/swagger-json-export",
+    "/openapi-json-export",
+    "/swagger-to-markdown",
+    "/swagger-to-pdf",
+    "/swagger-to-docx",
+    "/zh/swagger",
+    "/zh/swagger-json-export",
+    "/zh/openapi-json-export",
+    "/zh/swagger-to-pdf"
+};
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AddPageRoute("/Index", "swagger");
+
+    foreach (var route in seoPageRoutes)
+    {
+        options.Conventions.AddPageRoute("/Index", route.TrimStart('/'));
+    }
+});
 builder.Services.AddSingleton<ISwaggerPreviewStore, InMemorySwaggerPreviewStore>();
 builder.Services.AddSingleton<SwaggerConversionService>();
 
@@ -27,17 +48,19 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
 app.MapGet("/sitemap.xml", (HttpContext context) =>
 {
     var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+    var sitemapPaths = new[] { "/", "/swagger" }.Concat(seoPageRoutes);
     var document = new XDocument(
         new XDeclaration("1.0", "utf-8", null),
         new XElement(
             XName.Get("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9"),
-            CreateSitemapUrl(baseUrl, "/", "weekly", "1.0"),
-            CreateSitemapUrl(baseUrl, "/swagger", "weekly", "0.9")));
+            sitemapPaths.Select((path, index) => CreateSitemapUrl(
+                baseUrl,
+                path,
+                "weekly",
+                index == 0 ? "1.0" : "0.8"))));
 
     return Results.Text(document.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
 });

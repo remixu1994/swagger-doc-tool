@@ -1,10 +1,17 @@
+@{
+    var pageTitle = ViewData["Title"] as string ?? "Swagger JSON Preview & Export Tool - Export OpenAPI Docs to Markdown, DOCX, PDF";
+    var pageDescription = ViewData["Description"] as string ?? "Upload or paste Swagger/OpenAPI JSON, preview it with Swagger UI, and export API documentation to Markdown, DOCX, PDF, or ZIP online.";
+    var canonicalUrl = ViewData["CanonicalUrl"] as string ?? "https://swagger.sunmoon.cool/swagger";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@pageDescription" />
     <meta name="baidu-site-verification" content="codeva-ADhz4KozOW" />
-    <title>@ViewData["Title"]</title>
+    <link rel="canonical" href="@canonicalUrl" />
+    <title>@pageTitle</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SwaggerDocPreview.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)

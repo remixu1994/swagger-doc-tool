@@ -1,15 +1,93 @@
-@page "/swagger"
+@page "/"
+
 @model SwaggerDocPreview.Pages.IndexModel
 @{
-    ViewData["Title"] = "Swagger Doc Preview";
+    var currentPath = (HttpContext.Request.Path.Value ?? "/swagger").TrimEnd('/').ToLowerInvariant();
+    if (string.IsNullOrWhiteSpace(currentPath))
+    {
+        currentPath = "/swagger";
+    }
+
+    var pageTitle = "Swagger JSON Preview & Export Tool - Export OpenAPI Docs to Markdown, DOCX, PDF";
+    var pageDescription = "Upload or paste Swagger/OpenAPI JSON, preview it with Swagger UI, and export API documentation to Markdown, DOCX, PDF, or ZIP online.";
+    var pageHeading = "Swagger JSON Preview & Export Tool";
+    var pageSummary = "Upload or paste Swagger/OpenAPI JSON, preview it with Swagger UI, and export API documentation.";
+
+    switch (currentPath)
+    {
+        case "/swagger-json-preview":
+            pageTitle = "Swagger JSON Preview Tool - Preview OpenAPI JSON Online";
+            pageDescription = "Upload or paste Swagger/OpenAPI JSON and preview API documentation online with Swagger UI.";
+            pageHeading = "Swagger JSON Preview Tool";
+            pageSummary = "Upload or paste Swagger/OpenAPI JSON, validate it, and preview the API documentation with Swagger UI.";
+            break;
+        case "/swagger-json-export":
+            pageTitle = "Swagger JSON Export Tool - Export API Docs to Markdown, DOCX, PDF";
+            pageDescription = "Convert Swagger JSON into Markdown, DOCX, PDF, or ZIP documentation files online.";
+            pageHeading = "Swagger JSON Export Tool";
+            pageSummary = "Convert Swagger JSON into shareable API documentation formats including Markdown, DOCX, PDF, and ZIP.";
+            break;
+        case "/openapi-json-export":
+            pageTitle = "OpenAPI JSON Export Tool - Export OpenAPI Docs to Markdown, DOCX, PDF";
+            pageDescription = "Upload OpenAPI 3.x JSON, preview the API, and export documentation to Markdown, DOCX, PDF, or ZIP.";
+            pageHeading = "OpenAPI JSON Export Tool";
+            pageSummary = "Preview OpenAPI 3.x JSON and export generated API documentation for developers, testers, and product teams.";
+            break;
+        case "/swagger-to-markdown":
+            pageTitle = "Swagger to Markdown Converter - Export OpenAPI JSON to Markdown";
+            pageDescription = "Convert Swagger/OpenAPI JSON into Markdown API documentation online.";
+            pageHeading = "Swagger to Markdown Converter";
+            pageSummary = "Generate clean Markdown API documentation from Swagger or OpenAPI JSON.";
+            break;
+        case "/swagger-to-pdf":
+            pageTitle = "Swagger to PDF Converter - Export OpenAPI Documentation to PDF";
+            pageDescription = "Convert Swagger/OpenAPI JSON into PDF API documentation online.";
+            pageHeading = "Swagger to PDF Converter";
+            pageSummary = "Export Swagger or OpenAPI JSON as PDF documentation for sharing, review, and archive workflows.";
+            break;
+        case "/swagger-to-docx":
+            pageTitle = "Swagger to DOCX Converter - Export OpenAPI Documentation to Word";
+            pageDescription = "Convert Swagger/OpenAPI JSON into editable DOCX Word API documentation online.";
+            pageHeading = "Swagger to DOCX Converter";
+            pageSummary = "Create editable Word DOCX API documentation from Swagger or OpenAPI JSON.";
+            break;
+        case "/zh/swagger":
+            pageTitle = "Swagger JSON 在线预览和导出工具 - 支持 OpenAPI 转 Markdown、DOCX、PDF";
+            pageDescription = "在线上传或粘贴 Swagger/OpenAPI JSON，预览接口文档，并导出 Markdown、DOCX、PDF 或 ZIP 文件。";
+            pageHeading = "Swagger JSON 在线预览和导出工具";
+            pageSummary = "上传或粘贴 Swagger/OpenAPI JSON，在线预览接口文档，并导出 Markdown、DOCX、PDF 或 ZIP 文件。";
+            break;
+        case "/zh/swagger-json-export":
+            pageTitle = "Swagger JSON 导出工具 - 在线导出 Markdown、DOCX、PDF";
+            pageDescription = "在线将 Swagger JSON 转换为 Markdown、DOCX、PDF 或 ZIP 接口文档。";
+            pageHeading = "Swagger JSON 导出工具";
+            pageSummary = "将 Swagger JSON 在线转换为 Markdown、DOCX、PDF 或 ZIP，方便团队共享接口文档。";
+            break;
+        case "/zh/openapi-json-export":
+            pageTitle = "OpenAPI JSON 导出工具 - 在线生成 Markdown、DOCX、PDF 文档";
+            pageDescription = "在线上传 OpenAPI 3.x JSON，预览接口并导出 Markdown、DOCX、PDF 或 ZIP 文件。";
+            pageHeading = "OpenAPI JSON 导出工具";
+            pageSummary = "上传 OpenAPI 3.x JSON，在线预览接口文档，并生成可分享的多格式 API 文档。";
+            break;
+        case "/zh/swagger-to-pdf":
+            pageTitle = "Swagger 转 PDF 工具 - 在线导出 API 文档 PDF";
+            pageDescription = "在线将 Swagger/OpenAPI JSON 转换为 PDF API 文档。";
+            pageHeading = "Swagger 转 PDF 工具";
+            pageSummary = "把 Swagger/OpenAPI JSON 在线转换为 PDF 文档，适合归档、评审和对外共享。";
+            break;
+    }
+
+    ViewData["Title"] = pageTitle;
+    ViewData["Description"] = pageDescription;
+    ViewData["CanonicalUrl"] = $"https://swagger.sunmoon.cool{currentPath}";
     var hasPreview = !string.IsNullOrWhiteSpace(Model.PreviewId);
     var sourceName = string.IsNullOrWhiteSpace(Model.SourceName) ? "swagger.json" : Model.SourceName;
 }
 
 <section class="hero">
     <div>
-        <h1>Swagger Doc Preview</h1>
-        <p>Upload or paste Swagger/OpenAPI JSON, preview it with Swagger UI, and export documentation.</p>
+        <h1>@pageHeading</h1>
+        <p>@pageSummary</p>
     </div>
 </section>
 
@@ -185,6 +263,60 @@
             </div>
         </div>
     }
+</section>
+
+<section class="seo-content" aria-labelledby="swagger-export-tool-heading">
+    <div class="seo-content-grid">
+        <div class="seo-copy">
+            <h2 id="swagger-export-tool-heading">What can this Swagger export tool do?</h2>
+            <p>
+                This tool allows developers to upload or paste Swagger/OpenAPI JSON, preview API documentation with Swagger UI,
+                and export the documentation as Markdown, DOCX, PDF, or ZIP files.
+            </p>
+        </div>
+        <div class="seo-copy">
+            <h2>这个 Swagger 导出工具可以做什么？</h2>
+            <p>
+                你可以上传或粘贴 Swagger/OpenAPI JSON，在线预览接口文档，并将接口文档导出为 Markdown、DOCX、PDF 或 ZIP 文件。
+            </p>
+        </div>
+    </div>
+
+    <div class="seo-list-grid">
+        <section class="seo-list-card">
+            <h2>Supported formats</h2>
+            <ul>
+                <li>Swagger 2.0 JSON</li>
+                <li>OpenAPI 3.x JSON</li>
+                <li>Markdown export</li>
+                <li>DOCX export</li>
+                <li>PDF export</li>
+                <li>ZIP export</li>
+            </ul>
+        </section>
+
+        <section class="seo-list-card">
+            <h2>Common use cases</h2>
+            <ul>
+                <li>Generate API documentation from Swagger JSON</li>
+                <li>Convert OpenAPI JSON to Markdown</li>
+                <li>Export Swagger documentation to PDF</li>
+                <li>Share API documentation with non-technical users</li>
+            </ul>
+        </section>
+
+        <section class="seo-list-card">
+            <h2>支持的格式</h2>
+            <ul>
+                <li>Swagger 2.0 JSON</li>
+                <li>OpenAPI 3.x JSON</li>
+                <li>Markdown 文档导出</li>
+                <li>DOCX 文档导出</li>
+                <li>PDF 文档导出</li>
+                <li>ZIP 打包下载</li>
+            </ul>
+        </section>
+    </div>
 </section>
 
 <div class="loading-overlay" id="download-loading-overlay" aria-live="polite" aria-hidden="true">

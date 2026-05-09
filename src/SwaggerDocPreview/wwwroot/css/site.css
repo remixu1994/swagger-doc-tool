@@ -632,6 +632,62 @@ code {
     max-width: 520px;
 }
 
+.seo-content {
+    margin-top: 16px;
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgba(216, 225, 240, 0.88);
+    border-radius: var(--radius-xl);
+    background:
+        linear-gradient(135deg, rgba(29, 99, 240, 0.08), transparent 42%),
+        var(--surface);
+    box-shadow: var(--shadow-lg);
+}
+
+.seo-content-grid,
+.seo-list-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.seo-content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.seo-list-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.seo-copy,
+.seo-list-card {
+    padding: 18px;
+    border: 1px solid var(--stroke);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.seo-copy h2,
+.seo-list-card h2 {
+    margin: 0 0 10px;
+    color: var(--text);
+    font-size: 1.08rem;
+    letter-spacing: -0.02em;
+}
+
+.seo-copy p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.7;
+}
+
+.seo-list-card ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--text-soft);
+    line-height: 1.8;
+}
+
 .loading-overlay {
     position: fixed;
     inset: 0;
@@ -701,6 +757,11 @@ code {
 
     .download-grid {
         grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .seo-content-grid,
+    .seo-list-grid {
+        grid-template-columns: 1fr;
     }
 }
 
