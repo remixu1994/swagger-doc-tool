@@ -1,0 +1,62 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 10.0.x
+  CONFIGURATION: Release
+  SOLUTION_PATH: SwaaggerDocTool/SwaaggerDocTool.sln
+  PREVIEW_PROJECT: src/SwaggerDocPreview/SwaggerDocPreview.csproj
+  TEST_PROJECT: tests/SwaggerDocTool.Tests/SwaggerDocTool.Tests.csproj
+  PREVIEW_IMAGE: swagger-doc-preview
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Run tests
+        run: dotnet run --project ${{ env.TEST_PROJECT }} --configuration ${{ env.CONFIGURATION }} --no-build
+
+      - name: Publish SwaggerDocPreview
+        run: >
+          dotnet publish ${{ env.PREVIEW_PROJECT }}
+          --configuration ${{ env.CONFIGURATION }}
+          --no-build
+          --output artifacts/swagger-doc-preview
+          -p:UseAppHost=false
+
+      - name: Upload SwaggerDocPreview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swagger-doc-preview
+          path: artifacts/swagger-doc-preview
+          if-no-files-found: error
+
+      - name: Build Docker image
+        run: docker build --tag ${{ env.PREVIEW_IMAGE }}:${{ github.sha }} .
